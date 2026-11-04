@@ -17,12 +17,12 @@ public class PlayerInput : MonoBehaviour {
     private void Update()
     {
         Vector2 mousePosition = pointAction.ReadValue<Vector2>();
-        Debug.Log(mousePosition);
 
         if (clickAction.WasPressedThisFrame()){
             Debug.Log("Click!");
         }
 
         Ray ray = viewCamera.ScreenPointToRay(mousePosition);
+        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.green);
     }
 }
