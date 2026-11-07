@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 
 public class PlayerInput : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
-    RaycastHit hit;
 
     // variables to hold Action references
     InputAction pointAction;
@@ -20,15 +19,18 @@ public class PlayerInput : MonoBehaviour {
         UpdateRaycast(mousePosition);
     }
     private void UpdateRaycast(Vector2 mousePosition)
-    {
-        Ray ray = viewCamera.ScreenPointToRay(mousePosition);
-        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.green);
-        // if (clickAction.WasPressedThisFrame()){
-        //     Debug.Log("Click!");
-        // }
+    {   
+        const float rayDistance = 100f;
+        RaycastHit hit;
 
-        // Add Physics.Raycast and hit handling here.
-        
-        
+        Ray ray = viewCamera.ScreenPointToRay(mousePosition);
+        Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.green);
+
+        if (clickAction.WasPressedThisFrame() && 
+            Physics.Raycast(ray, out hit, rayDistance))
+        {
+            IClickable clickable = hit.collider.GetComponentInParent<IClickable>();
+            clickable?.OnClicked();
+        }
     }
 }
