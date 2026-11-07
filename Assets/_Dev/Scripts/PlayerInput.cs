@@ -16,7 +16,11 @@ public class PlayerInput : MonoBehaviour {
     private void Update()
     {
         Vector2 mousePosition = pointAction.ReadValue<Vector2>();
+        
+        if (clickAction.WasPressedThisFrame())
+        {
         UpdateRaycast(mousePosition);
+        }
     }
     private void UpdateRaycast(Vector2 mousePosition)
     {   
@@ -26,8 +30,7 @@ public class PlayerInput : MonoBehaviour {
         Ray ray = viewCamera.ScreenPointToRay(mousePosition);
         Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.green);
 
-        if (clickAction.WasPressedThisFrame() && 
-            Physics.Raycast(ray, out hit, rayDistance))
+        if (Physics.Raycast(ray, out hit, rayDistance))
         {
             IClickable clickable = hit.collider.GetComponentInParent<IClickable>();
             clickable?.OnClicked();
