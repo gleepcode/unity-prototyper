@@ -1,2 +1,12 @@
 fileFormatVersion: 2
 guid: 5ebdbda70264284408d22cfc83f9f0cd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - deathEffect: {fileID: 2941334866249118735, guid: 8d7b442780fd85f4ba68688677f8b6ca, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

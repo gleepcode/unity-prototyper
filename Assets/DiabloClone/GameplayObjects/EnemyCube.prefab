@@ -126,4 +126,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   health: 1
-  deathEffect: {fileID: 992170265951252876, guid: 162893c4a9354ad4eb1c847a4659c495, type: 3}
+  deathEffect: {fileID: 2941334866249118735, guid: 8d7b442780fd85f4ba68688677f8b6ca, type: 3}
