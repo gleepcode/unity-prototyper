@@ -8,7 +8,6 @@ public class EnemyCube : MonoBehaviour, IClickable
     public void OnClicked()
     {
         health--;
-        Debug.Log("Ow!");
         
         if (health <= 0)
         {
