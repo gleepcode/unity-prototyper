@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.AI;
 
 public class PlayerInput : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
@@ -8,10 +9,15 @@ public class PlayerInput : MonoBehaviour {
     InputAction pointAction;
     InputAction clickAction;
 
-    private Vector3 moveTarget;
+    NavMeshAgent agent;
+
+    Vector3 moveTarget;
+    bool hasMoveTarget;
 
     private void Start()
     {
+        agent = GetComponent<NavMeshAgent>();
+
         pointAction = InputSystem.actions.FindAction("Point");
         clickAction = InputSystem.actions.FindAction("Click");
     }
@@ -24,7 +30,7 @@ public class PlayerInput : MonoBehaviour {
         UpdateRaycast(mousePosition);
         }
 
-        if (moveTarget != null)
+        if (hasMoveTarget)
         {
             MovePlayer();
         }
@@ -45,11 +51,19 @@ public class PlayerInput : MonoBehaviour {
             if(hit.transform.CompareTag("Floor"))
             {
                 moveTarget = hit.point;
+                hasMoveTarget = true;
             }
         }
     }
     private void MovePlayer()
     {
         // Move the player to the target location
+        agent.destination = moveTarget;
+
+        if (agent.remainingDistance <= 1f)
+        {
+            hasMoveTarget = false;
+        }
+
     }
 }
