@@ -120,11 +120,17 @@ public class PlayerInput : MonoBehaviour {
 
         LookAtTarget(attackTarget.transform.position);
 
-        // If the player issues a new command, or if the attackRange is exceded, stop attacking
-        if (agent.pathPending || agent.remainingDistance > attackRange)
+        if (agent.pathPending)
         {
             return;
         }
+
+        if (Vector3.Distance(transform.position, attackTarget.transform.position) > attackRange)
+        {
+            agent.isStopped = false;
+            return;
+        }
+
         agent.isStopped = true;
 
         if (Time.time < nextAttackTime)
@@ -153,15 +159,15 @@ public class PlayerInput : MonoBehaviour {
 
     private void LookAtTarget(Vector3 target)
     {
-        // Calculate direction to target, ignoring the height (Y axis) to prevent tipping over
-        Vector3 direction = (target - transform.position).normalized;
-        direction.y = 0; 
+    // Calculate direction to target, ignoring the height (Y axis) to prevent tipping over
+    Vector3 direction = (target - transform.position).normalized;
+    direction.y = 0;
 
-        if (direction != Vector3.zero)
-        {
-            // Create the target rotation and smoothly interpolate (Slerp) toward it
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookAtSpeed);
-        }
+    if (direction != Vector3.zero)
+    {
+        // Create the target rotation and smoothly interpolate (Slerp) toward it
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookAtSpeed);
+    }
 }
 }

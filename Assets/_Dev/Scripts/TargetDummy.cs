@@ -2,29 +2,27 @@ using UnityEngine;
 
 public class TargetDummy : MonoBehaviour, IDamageable
 {
-    [SerializeField] private int health = 3;
+    [SerializeField] private float health = 5f;
+    [SerializeField] private GameObject deathEffect;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    AudioSource audioData;
     void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        audioData = GetComponent<AudioSource>();
     }
 
     public void OnDamage(float damage)
     {
         Debug.Log($"{gameObject.name} took {damage} damage.");
-        
-        health--;
-        
+        health -= damage;
         if (health <= 0)
         {
             Destroy(gameObject);
         }
+        audioData.Play();
+    }
+     void OnDestroy()
+    {
+        Instantiate(deathEffect, transform.position, Quaternion.identity);
     }
 }
