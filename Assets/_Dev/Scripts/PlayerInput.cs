@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.AI;
+using UnityEngine.TextCore;
 
 public class PlayerInput : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
@@ -8,6 +9,7 @@ public class PlayerInput : MonoBehaviour {
     [SerializeField] private float maxDamage = 1f;
     [SerializeField] private float attackRange = 4f;
     [SerializeField] private float attackSpeed = 0.4f;
+    [SerializeField] private float lookAtSpeed = 100f;
 
     // variables to hold Action references
     InputAction pointAction;
@@ -24,6 +26,7 @@ public class PlayerInput : MonoBehaviour {
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        agent.updateRotation = false;
 
         pointAction = InputSystem.actions.FindAction("Point");
         clickAction = InputSystem.actions.FindAction("Click");
@@ -77,6 +80,7 @@ public class PlayerInput : MonoBehaviour {
     }
     private void Move()
     {
+        LookAtTarget(moveTarget);
         // Move the player to the target location
         agent.destination = moveTarget;
 
@@ -104,12 +108,13 @@ public class PlayerInput : MonoBehaviour {
             return;
         }
 
+        LookAtTarget(attackTarget.transform.position);
+
         // If the player issues a new command, or if the attackRange is exceded, stop attacking
         if (agent.pathPending || agent.remainingDistance > attackRange)
         {
             return;
         }
-
         agent.isStopped = true;
 
         if (Time.time < nextAttackTime)
@@ -140,4 +145,18 @@ public class PlayerInput : MonoBehaviour {
     {
         return Random.Range(minDamage, maxDamage);
     }
+
+    private void LookAtTarget(Vector3 target)
+    {
+        // Calculate direction to target, ignoring the height (Y axis) to prevent tipping over
+        Vector3 direction = (target - transform.position).normalized;
+        direction.y = 0; 
+
+        if (direction != Vector3.zero)
+        {
+            // Create the target rotation and smoothly interpolate (Slerp) toward it
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookAtSpeed);
+        }
+}
 }

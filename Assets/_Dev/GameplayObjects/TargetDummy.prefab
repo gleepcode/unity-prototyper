@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7602278892126759918}
   - component: {fileID: 4902926393201512124}
   m_Layer: 0
-  m_Name: EnemyCube
+  m_Name: TargetDummy
   m_TagString: Attackable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -126,7 +126,7 @@ NavMeshObstacle:
   m_Shape: 1
   m_Extents: {x: 0.5, y: 0.5, z: 0.5}
   m_MoveThreshold: 0.1
-  m_Carve: 1
+  m_Carve: 0
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
@@ -142,3 +142,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fa7b2782c611af46a4ae543fe4bbc3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TargetDummy
+  health: 3
