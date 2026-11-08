@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.AI;
-using UnityEngine.TextCore;
 
 public class PlayerInput : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
@@ -37,7 +36,7 @@ public class PlayerInput : MonoBehaviour {
 
         if (clickAction.WasPressedThisFrame())
         {
-        UpdateRaycast(mousePosition);
+            UpdateRaycast(mousePosition);
         }
 
         if (hasAttackTarget)
@@ -63,21 +62,32 @@ public class PlayerInput : MonoBehaviour {
 
             if (hit.transform.CompareTag("Floor"))
             {
-                ClearAttackTarget();
-                agent.isStopped = false;
-                moveTarget = hit.point;
-                hasMoveTarget = true;
+                HandleFloorClick();
             }
             else if (hit.transform.CompareTag("Attackable"))
             {
-                hasMoveTarget = false;
-                attackTarget = hit.transform.gameObject;
-                hasAttackTarget = true;
-                nextAttackTime = 0f;
-                MoveToAttackTarget();
+                HandleAttackableClick();
             }
         }
     }
+
+    private void HandleFloorClick()
+    {
+        ClearAttackTarget();
+        agent.isStopped = false;
+        moveTarget = hit.point;
+        hasMoveTarget = true;
+    }
+
+    private void HandleAttackableClick()
+    {
+        hasMoveTarget = false;
+        attackTarget = hit.transform.gameObject;
+        hasAttackTarget = true;
+        nextAttackTime = 0f;
+        MoveToAttackTarget();
+    }
+
     private void Move()
     {
         LookAtTarget(moveTarget);
@@ -131,7 +141,7 @@ public class PlayerInput : MonoBehaviour {
             return;
         }
 
-        damageable.OnDamage(RandomizeAttackDamage());
+        damageable.OnDamage(Random.Range(minDamage, maxDamage));
         nextAttackTime = Time.time + attackSpeed;
     }
 
@@ -139,11 +149,6 @@ public class PlayerInput : MonoBehaviour {
     {
         attackTarget = null;
         hasAttackTarget = false;
-    }
-
-    private float RandomizeAttackDamage()
-    {
-        return Random.Range(minDamage, maxDamage);
     }
 
     private void LookAtTarget(Vector3 target)
