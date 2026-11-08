@@ -147,7 +147,7 @@ public class PlayerInput : MonoBehaviour {
             return;
         }
 
-        damageable.OnDamage(Random.Range(minDamage, maxDamage));
+        damageable.OnDamage(DetermineAttackDamage());
         nextAttackTime = Time.time + attackSpeed;
     }
 
@@ -169,5 +169,12 @@ public class PlayerInput : MonoBehaviour {
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookAtSpeed);
     }
-}
+    }
+
+    private float DetermineAttackDamage()
+    {
+        float damage = Random.Range(minDamage, maxDamage);
+        // Round to 1 decimal place
+        return Mathf.Round(damage * 10.0f) * 0.1f;
+    }
 }
