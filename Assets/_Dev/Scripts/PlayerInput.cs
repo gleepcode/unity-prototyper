@@ -4,15 +4,22 @@ using UnityEngine.AI;
 
 public class PlayerInput : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
+    [SerializeField] private float minDamage = 0.1f;
+    [SerializeField] private float maxDamage = 1f;
+    [SerializeField] private float attackRange = 4f;
+    [SerializeField] private float attackSpeed = 0.4f;
 
     // variables to hold Action references
     InputAction pointAction;
     InputAction clickAction;
 
     NavMeshAgent agent;
-
+    RaycastHit hit;
     Vector3 moveTarget;
+    GameObject attackTarget;
     bool hasMoveTarget;
+    bool hasAttackTarget;
+    float nextAttackTime;
 
     private void Start()
     {
@@ -30,15 +37,18 @@ public class PlayerInput : MonoBehaviour {
         UpdateRaycast(mousePosition);
         }
 
-        if (hasMoveTarget)
+        if (hasAttackTarget)
         {
-            MovePlayer();
+            UpdateAttackTarget();
+        }
+        else if (hasMoveTarget)
+        {
+            Move();
         }
     }
     private void UpdateRaycast(Vector2 mousePosition)
     {   
         const float rayDistance = 100f;
-        RaycastHit hit;
 
         Ray ray = viewCamera.ScreenPointToRay(mousePosition);
         Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.green);
@@ -48,14 +58,24 @@ public class PlayerInput : MonoBehaviour {
             IClickable clickable = hit.collider.GetComponentInParent<IClickable>();
             clickable?.OnClicked();
 
-            if(hit.transform.CompareTag("Floor"))
+            if (hit.transform.CompareTag("Floor"))
             {
+                ClearAttackTarget();
+                agent.isStopped = false;
                 moveTarget = hit.point;
                 hasMoveTarget = true;
             }
+            else if (hit.transform.CompareTag("Attackable"))
+            {
+                hasMoveTarget = false;
+                attackTarget = hit.transform.gameObject;
+                hasAttackTarget = true;
+                nextAttackTime = 0f;
+                MoveToAttackTarget();
+            }
         }
     }
-    private void MovePlayer()
+    private void Move()
     {
         // Move the player to the target location
         agent.destination = moveTarget;
@@ -65,5 +85,59 @@ public class PlayerInput : MonoBehaviour {
             hasMoveTarget = false;
         }
 
+    }
+
+    private void MoveToAttackTarget()
+    {
+        agent.isStopped = false;
+        agent.destination = attackTarget.transform.position;
+    }
+
+    private void UpdateAttackTarget()
+    {
+        // Check if attack target still exists
+        if (attackTarget == null)
+        {
+            ClearAttackTarget();
+            agent.ResetPath();
+            agent.isStopped = false;
+            return;
+        }
+
+        // If the player issues a new command, or if the attackRange is exceded, stop attacking
+        if (agent.pathPending || agent.remainingDistance > attackRange)
+        {
+            return;
+        }
+
+        agent.isStopped = true;
+
+        if (Time.time < nextAttackTime)
+        {
+            return;
+        }
+
+        IDamageable damageable = attackTarget.GetComponentInParent<IDamageable>();
+        if (damageable == null)
+        {
+            Debug.LogWarning($"Attack target '{attackTarget.name}' does not implement IDamageable.", attackTarget);
+            ClearAttackTarget();
+            agent.isStopped = false;
+            return;
+        }
+
+        damageable.OnDamage(RandomizeAttackDamage());
+        nextAttackTime = Time.time + attackSpeed;
+    }
+
+    private void ClearAttackTarget()
+    {
+        attackTarget = null;
+        hasAttackTarget = false;
+    }
+
+    private float RandomizeAttackDamage()
+    {
+        return Random.Range(minDamage, maxDamage);
     }
 }

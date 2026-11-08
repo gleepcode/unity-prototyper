@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyCube : MonoBehaviour, IClickable
+public class DestroyOnClick : MonoBehaviour, IClickable
 {
     [SerializeField] private int health = 1;
     [SerializeField] private GameObject deathEffect;
