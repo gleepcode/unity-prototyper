@@ -22,7 +22,7 @@ public class PlayerInput : MonoBehaviour {
     bool hasAttackTarget;
     float nextAttackTime;
 
-    private void Start()
+    private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false;
@@ -30,15 +30,27 @@ public class PlayerInput : MonoBehaviour {
         pointAction = InputSystem.actions.FindAction("Point");
         clickAction = InputSystem.actions.FindAction("Click");
     }
-    private void Update()
+
+    private void OnEnable()
+    {
+        // Listen for the Click action & call OnClickPerformed when it fires.
+        clickAction.performed += OnClickPerformed;
+    }
+
+    private void OnDisable()
+    {
+        clickAction.performed -= OnClickPerformed;
+    }
+
+    // Unity passes click-event details in context, the event requires this parameter
+    private void OnClickPerformed(InputAction.CallbackContext context)
     {
         Vector2 mousePosition = pointAction.ReadValue<Vector2>();
+        UpdateRaycast(mousePosition);
+    }
 
-        if (clickAction.WasPressedThisFrame())
-        {
-            UpdateRaycast(mousePosition);
-        }
-
+    private void Update()
+    {
         if (hasAttackTarget)
         {
             UpdateAttackTarget();
@@ -50,10 +62,9 @@ public class PlayerInput : MonoBehaviour {
     }
     private void UpdateRaycast(Vector2 mousePosition)
     {   
-        const float rayDistance = 100f;
-
+        float rayDistance = 100f;
         Ray ray = viewCamera.ScreenPointToRay(mousePosition);
-        Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.green);
+        //Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.green);
 
         if (Physics.Raycast(ray, out hit, rayDistance))
         {
@@ -68,6 +79,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 HandleAttackableClick();
             }
+            else return;
         }
     }
 
@@ -87,6 +99,8 @@ public class PlayerInput : MonoBehaviour {
         nextAttackTime = 0f;
         MoveToAttackTarget();
     }
+
+
 
     private void Move()
     {
