@@ -100,8 +100,6 @@ public class PlayerInput : MonoBehaviour {
         MoveToAttackTarget();
     }
 
-
-
     private void Move()
     {
         LookAtTarget(moveTarget);
