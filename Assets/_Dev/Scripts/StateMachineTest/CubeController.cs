@@ -5,9 +5,12 @@ public class CubeController : MonoBehaviour
     private StateMachine stateMachine;
     private RotateState rotateState;
     private IdleState idleState;
-
+    private InputManager inputManager;
+    
     private void Awake()
     {
+        inputManager = GetComponent<InputManager>();
+
         stateMachine = new StateMachine();
 
         rotateState = new RotateState(transform);
@@ -19,6 +22,11 @@ public class CubeController : MonoBehaviour
     private void Update()
     {
         stateMachine.Execute();
+
+        if (inputManager.LeftClickPressedThisFrame)
+        {
+            HandleClick();
+        }
     }
 
     public void HandleClick()

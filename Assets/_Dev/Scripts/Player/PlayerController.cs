@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.AI;
 
-public class PlayerInput : MonoBehaviour {
+public class PlayerController : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
     [SerializeField] private float minDamage = 0.1f;
     [SerializeField] private float maxDamage = 1f;
