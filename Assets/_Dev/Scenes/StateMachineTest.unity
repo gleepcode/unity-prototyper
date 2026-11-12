@@ -505,10 +505,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2104914118}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e7e4d50dfe99004b87b61564550b648, type: 3}
+  m_Script: {fileID: 11500000, guid: a3db4c5cbe791c7429ebf6d729e72a38, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CubeInput
-  controller: {fileID: 2104914119}
+  m_EditorClassIdentifier: Assembly-CSharp::InputManager
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

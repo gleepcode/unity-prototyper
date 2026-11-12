@@ -1,19 +1,17 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour {
     [SerializeField] private Camera viewCamera;
+    [SerializeField] private InputManager inputManager;
+
+    // Player stats
     [SerializeField] private float minDamage = 0.1f;
     [SerializeField] private float maxDamage = 1f;
     [SerializeField] private float attackRange = 4f;
     [SerializeField] private float attackSpeed = 0.4f;
     [SerializeField] private float lookAtSpeed = 100f;
-
-    // variables to hold Action references
-    InputAction pointAction;
-    InputAction clickAction;
-
+    
     NavMeshAgent agent;
     RaycastHit hit;
     Vector3 moveTarget;
@@ -26,31 +24,15 @@ public class PlayerController : MonoBehaviour {
     {
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false;
-
-        pointAction = InputSystem.actions.FindAction("Point");
-        clickAction = InputSystem.actions.FindAction("Click");
-    }
-
-    private void OnEnable()
-    {
-        // Listen for the Click action & call OnClickPerformed when it fires.
-        clickAction.performed += OnClickPerformed;
-    }
-
-    private void OnDisable()
-    {
-        clickAction.performed -= OnClickPerformed;
-    }
-
-    // Unity passes click-event details in context, the event requires this parameter
-    private void OnClickPerformed(InputAction.CallbackContext context)
-    {
-        Vector2 mousePosition = pointAction.ReadValue<Vector2>();
-        UpdateRaycast(mousePosition);
     }
 
     private void Update()
     {
+        if (inputManager.LeftClickPressedThisFrame)
+        {
+            HandleClick();
+        }
+
         if (hasAttackTarget)
         {
             UpdateAttackTarget();
@@ -60,6 +42,13 @@ public class PlayerController : MonoBehaviour {
             Move();
         }
     }
+
+    private void HandleClick()
+    {
+        Vector2 mousePosition = inputManager.MousePosition;
+        UpdateRaycast(mousePosition);
+    }
+
     private void UpdateRaycast(Vector2 mousePosition)
     {   
         float rayDistance = 100f;
