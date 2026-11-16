@@ -3,10 +3,6 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour {
-
-    [SerializeField] private string testString = "Hello, World!";
-    public string TestString => testString;
-    
     private PlayerStateMachine playerStateMachine;
     private PlayerIdleState playerIdleState;
     private PlayerMoveState playerMoveState;

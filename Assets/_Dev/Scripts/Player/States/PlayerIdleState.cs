@@ -11,7 +11,6 @@ public class PlayerIdleState : IState
     public void Enter()
     {
         Debug.Log("Player has entered Idle State");
-        Debug.Log(player.TestString);
     }
 
     public void Execute()
