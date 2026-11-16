@@ -1,0 +1,34 @@
+using UnityEngine;
+public class PlayerIdleState : IState
+{
+    private PlayerController player;
+
+    public PlayerIdleState(PlayerController player)
+    {
+        this.player = player;
+    }
+
+    public void Enter()
+    {
+        Debug.Log("Player has entered Idle State");
+        Debug.Log(player.TestString);
+    }
+
+    public void Execute()
+    {
+        if (player.HasMoveTarget)
+        {
+            player.EnterMoveState();
+        }
+
+        if (player.HasAttackTarget)
+        {
+            player.EnterChaseState();
+        }
+    }
+    
+    public void Exit()
+    {
+
+    }
+}

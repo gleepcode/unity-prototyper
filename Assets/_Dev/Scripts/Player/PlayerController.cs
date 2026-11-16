@@ -1,27 +1,61 @@
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour {
+
+    [SerializeField] private string testString = "Hello, World!";
+    public string TestString => testString;
+    
+    private PlayerStateMachine playerStateMachine;
+    private PlayerIdleState playerIdleState;
+    private PlayerMoveState playerMoveState;
+    private PlayerChaseState playerChaseState;
+    private PlayerAttackState playerAttackState;
+    
+
     [SerializeField] private Camera viewCamera;
     [SerializeField] private InputManager inputManager;
 
-    // Player stats
+    // Serialized fields for attack parameters
     [SerializeField] private float minDamage = 0.1f;
     [SerializeField] private float maxDamage = 1f;
     [SerializeField] private float attackRange = 4f;
     [SerializeField] private float attackSpeed = 0.4f;
     [SerializeField] private float lookAtSpeed = 100f;
-    
+    float nextAttackTime;
+
     NavMeshAgent agent;
     RaycastHit hit;
+
+    // Variables to store the current move target and attack target
     Vector3 moveTarget;
     GameObject attackTarget;
-    bool hasMoveTarget;
-    bool hasAttackTarget;
-    float nextAttackTime;
+
+    // Public properties to expose the move target and attack target
+    public Vector3 MoveTarget => moveTarget;
+    public GameObject AttackTarget => attackTarget;
+
+    // Flags to track if the player has a move target or an attack target
+    private bool hasMoveTarget;
+    private bool hasAttackTarget;
+
+    // Public properties to expose the flags
+    public bool HasMoveTarget => hasMoveTarget;
+    public bool HasAttackTarget => hasAttackTarget;
 
     private void Awake()
     {
+        // Creating instances of all concrete state classes
+        // Pass PlayerController into each state
+        playerIdleState = new PlayerIdleState(this);
+        playerMoveState = new PlayerMoveState(this);
+        playerChaseState = new PlayerChaseState(this);
+        playerAttackState = new PlayerAttackState(this);
+
+        playerStateMachine = new PlayerStateMachine();
+        playerStateMachine.Initialize(playerIdleState);
+        
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false;
     }
@@ -30,7 +64,8 @@ public class PlayerController : MonoBehaviour {
     {
         if (inputManager.LeftClickPressedThisFrame)
         {
-            HandleClick();
+            Vector2 mousePosition = inputManager.MousePosition;
+            UpdateRaycast(mousePosition);
         }
 
         if (hasAttackTarget)
@@ -41,12 +76,8 @@ public class PlayerController : MonoBehaviour {
         {
             Move();
         }
-    }
 
-    private void HandleClick()
-    {
-        Vector2 mousePosition = inputManager.MousePosition;
-        UpdateRaycast(mousePosition);
+        playerStateMachine.Execute();
     }
 
     private void UpdateRaycast(Vector2 mousePosition)
@@ -177,5 +208,25 @@ public class PlayerController : MonoBehaviour {
         float damage = Random.Range(minDamage, maxDamage);
         // Round to 1 decimal place
         return Mathf.Round(damage * 10.0f) * 0.1f;
+    }
+
+    
+    // State transition methods for external access
+    public void EnterIdleState()
+    {
+        playerStateMachine.TransitionTo(playerIdleState);
+    }
+    public void EnterMoveState()
+    {
+        playerStateMachine.TransitionTo(playerMoveState);
+    }
+   
+    public void EnterChaseState()
+    {
+        playerStateMachine.TransitionTo(playerChaseState);
+    }
+    public void EnterAttackState()
+    {
+        playerStateMachine.TransitionTo(playerAttackState);
     }
 }
