@@ -15,15 +15,7 @@ public class PlayerIdleState : IState
 
     public void Execute()
     {
-        if (player.HasMoveTarget)
-        {
-            player.EnterMoveState();
-        }
-
-        if (player.HasAttackTarget)
-        {
-            player.EnterChaseState();
-        }
+        
     }
     
     public void Exit()

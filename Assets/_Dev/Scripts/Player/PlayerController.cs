@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -32,14 +31,6 @@ public class PlayerController : MonoBehaviour {
     public Vector3 MoveTarget => moveTarget;
     public GameObject AttackTarget => attackTarget;
 
-    // Flags to track if the player has a move target or an attack target
-    private bool hasMoveTarget;
-    private bool hasAttackTarget;
-
-    // Public properties to expose the flags
-    public bool HasMoveTarget => hasMoveTarget;
-    public bool HasAttackTarget => hasAttackTarget;
-
     private void Awake()
     {
         // Creating instances of all concrete state classes
@@ -64,15 +55,6 @@ public class PlayerController : MonoBehaviour {
             UpdateRaycast(mousePosition);
         }
 
-        if (hasAttackTarget)
-        {
-            UpdateAttackTarget();
-        }
-        else if (hasMoveTarget)
-        {
-            Move();
-        }
-
         playerStateMachine.Execute();
     }
 
@@ -84,9 +66,6 @@ public class PlayerController : MonoBehaviour {
 
         if (Physics.Raycast(ray, out hit, rayDistance))
         {
-            IClickable clickable = hit.collider.GetComponentInParent<IClickable>();
-            clickable?.OnClicked();
-
             if (hit.transform.CompareTag("Floor"))
             {
                 HandleFloorClick();
@@ -101,64 +80,40 @@ public class PlayerController : MonoBehaviour {
 
     private void HandleFloorClick()
     {
+        TransitionToMoveState();
         ClearAttackTarget();
         agent.isStopped = false;
         moveTarget = hit.point;
-        hasMoveTarget = true;
     }
 
     private void HandleAttackableClick()
     {
-        hasMoveTarget = false;
         attackTarget = hit.transform.gameObject;
-        hasAttackTarget = true;
         nextAttackTime = 0f;
-        MoveToAttackTarget();
+        TransitionToChaseState();
     }
 
-    private void Move()
+    public void MoveToTarget()
     {
         LookAtTarget(moveTarget);
         // Move the player to the target location
         agent.destination = moveTarget;
-
-        if (agent.remainingDistance <= 1f)
-        {
-            hasMoveTarget = false;
-        }
-
     }
 
-    private void MoveToAttackTarget()
+    public bool MoveTargetReached()
+    {
+        if (!agent.pathPending && !agent.hasPath) return true;
+        else return false;
+    }
+
+    public void ChaseAttackTarget()
     {
         agent.isStopped = false;
         agent.destination = attackTarget.transform.position;
     }
 
-    private void UpdateAttackTarget()
+    public void Attack()
     {
-        // Check if attack target still exists
-        if (attackTarget == null)
-        {
-            ClearAttackTarget();
-            agent.ResetPath();
-            agent.isStopped = false;
-            return;
-        }
-
-        LookAtTarget(attackTarget.transform.position);
-
-        if (agent.pathPending)
-        {
-            return;
-        }
-
-        if (Vector3.Distance(transform.position, attackTarget.transform.position) > attackRange)
-        {
-            agent.isStopped = false;
-            return;
-        }
-
         agent.isStopped = true;
 
         if (Time.time < nextAttackTime)
@@ -167,22 +122,27 @@ public class PlayerController : MonoBehaviour {
         }
 
         IDamageable damageable = attackTarget.GetComponentInParent<IDamageable>();
-        if (damageable == null)
-        {
-            Debug.LogWarning($"Attack target '{attackTarget.name}' does not implement IDamageable.", attackTarget);
-            ClearAttackTarget();
-            agent.isStopped = false;
-            return;
-        }
-
         damageable.OnDamage(DetermineAttackDamage());
         nextAttackTime = Time.time + attackSpeed;
     }
 
-    private void ClearAttackTarget()
+    public bool HasAttackTarget()
+    {
+        if (attackTarget == null)
+        {
+            return false;
+        }
+        else return true;
+    }
+
+    public bool IsInAttackRange()
+    {
+        float distanceToTarget = Vector3.Distance(transform.position, attackTarget.transform.position);
+        return distanceToTarget <= attackRange;
+    }
+    public void ClearAttackTarget()
     {
         attackTarget = null;
-        hasAttackTarget = false;
     }
 
     private void LookAtTarget(Vector3 target)
@@ -208,20 +168,20 @@ public class PlayerController : MonoBehaviour {
 
     
     // State transition methods for external access
-    public void EnterIdleState()
+    public void TransitionToIdleState()
     {
         playerStateMachine.TransitionTo(playerIdleState);
     }
-    public void EnterMoveState()
+    public void TransitionToMoveState()
     {
         playerStateMachine.TransitionTo(playerMoveState);
     }
    
-    public void EnterChaseState()
+    public void TransitionToChaseState()
     {
         playerStateMachine.TransitionTo(playerChaseState);
     }
-    public void EnterAttackState()
+    public void TransitionToAttackState()
     {
         playerStateMachine.TransitionTo(playerAttackState);
     }

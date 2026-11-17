@@ -10,11 +10,16 @@ public class PlayerMoveState : IState
 
     public void Enter()
     {
-
+        Debug.Log("Player has entered Move State");
     }
     public void Execute()
-    {
-        
+    {   
+        player.MoveToTarget();
+
+        if (player.MoveTargetReached())
+        {
+            player.TransitionToIdleState();
+        }
     }
     public void Exit()
     {
